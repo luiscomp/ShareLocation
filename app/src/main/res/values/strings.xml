@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">ShareLocation</string>
+
+    <string name="email_text">Email</string>
+    <string name="senha_text">Senha</string>
+    <string name="login_text">Entrar</string>
+    <string name="registrar_text">Registrar</string>
+    <string name="login_ou_registrar_text">Entrar ou Registrar</string>
+    <string name="concluir_text">Concluir</string>
+    <string name="usuario_nao_encontrado_text">Não encontramos nenhum usuário com o login e senha informada, deseja registrar um novo com as credenciais informadas?</string>
+    <string name="confirmar_senha_text">Confirme sua senha</string>
+    <string name="email_invalido_text">Email inválido</string>
+    <string name="senha_invalida_text">Senha inválida</string>
+    <string name="confirmar_senha_invalida_text">A confirmação deve ser igual a senha</string>
+    <string name="nome_text">Nome</string>
+    <string name="nome_invalido_text">Informe um nome</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_registrar">Registrar</string>
+</resources>
