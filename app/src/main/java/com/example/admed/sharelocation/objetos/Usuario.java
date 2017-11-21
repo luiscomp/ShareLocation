@@ -14,6 +14,7 @@ public class Usuario implements Parcelable {
     private String senha;
     private Double latitude;
     private Double longitude;
+    private Boolean online;
 
     public Usuario() {
     }
@@ -23,8 +24,18 @@ public class Usuario implements Parcelable {
         nome = in.readString();
         email = in.readString();
         senha = in.readString();
-        latitude = in.readDouble();
-        longitude = in.readDouble();
+        if (in.readByte() == 0) {
+            latitude = null;
+        } else {
+            latitude = in.readDouble();
+        }
+        if (in.readByte() == 0) {
+            longitude = null;
+        } else {
+            longitude = in.readDouble();
+        }
+        byte tmpOnline = in.readByte();
+        online = tmpOnline == 0 ? null : tmpOnline == 1;
     }
 
     public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
@@ -87,18 +98,37 @@ public class Usuario implements Parcelable {
         this.longitude = longitude;
     }
 
+    public Boolean getOnline() {
+        return online;
+    }
+
+    public void setOnline(Boolean online) {
+        this.online = online;
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(nome);
-        parcel.writeString(email);
-        parcel.writeString(senha);
-        parcel.writeDouble(latitude);
-        parcel.writeDouble(longitude);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(nome);
+        dest.writeString(email);
+        dest.writeString(senha);
+        if (latitude == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeDouble(latitude);
+        }
+        if (longitude == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeDouble(longitude);
+        }
+        dest.writeByte((byte) (online == null ? 0 : online ? 1 : 2));
     }
 }

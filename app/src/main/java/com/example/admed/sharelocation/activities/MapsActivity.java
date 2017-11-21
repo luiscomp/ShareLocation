@@ -15,6 +15,9 @@ import android.support.v4.content.ContextCompat;
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.objetos.Usuario;
 import com.example.admed.sharelocation.utils.Util;
+import com.example.admed.sharelocation.utils.mapsutil.LatLngInterpolator;
+import com.example.admed.sharelocation.utils.mapsutil.MapUtils;
+import com.example.admed.sharelocation.utils.mapsutil.MarkerAnimation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -35,6 +38,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -66,7 +70,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
 
-    Map<String, Usuario> usuarioCadastrados = new HashMap<>();
+    private Map<String, Usuario> usuariosLogados = new HashMap<>();
+    private Map<String, Marker> usuariosLogadosMarker = new HashMap<>();
 
     private LocationCallback locationCallBack = new LocationCallback() {
         @Override
@@ -100,36 +105,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        recuperarUsuario();
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         setUpGClient();
-
-        recuperarUsuario();
-        recuperarListaDeUsuarios();
-    }
-
-    private void recuperarListaDeUsuarios() {
-        Query query = dataBaseReference.getRoot().child("usuarios").orderByChild("id");
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot data: dataSnapshot.getChildren()) {
-                    Usuario usuario = data.getValue(Usuario.class);
-                    if(!usuario.getId().equals(MapsActivity.this.usuario.getId())) {
-                        usuarioCadastrados.put(usuario.getId(), usuario);
-
-                        if(usuario.getLatitude() != null && usuario.getLongitude() != null) {
-                            // TODO - COLOCAR O MARKER COM A POSIÇÃO INDICADA DO USUARIO
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override
@@ -140,15 +121,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void adicionarListenerDeAtualizacao() {
-        dataBaseReference.getRoot().child("usuarios").addChildEventListener(new ChildEventListener() {
+        dataBaseReference.getRoot().child("usuarios").orderByChild("online").equalTo(Boolean.TRUE).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
+                atualizarPosicaoUsuarioMapa(dataSnapshot.getValue(Usuario.class));
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                // TODO - ATUALIZAR A POSIÇÃO DO USUARIO
+                atualizarPosicaoUsuarioMapa(dataSnapshot.getValue(Usuario.class));
             }
 
             @Override
@@ -168,12 +149,88 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    private void atualizarPosicaoUsuarioMapa(Usuario usuario) {
+        if (!usuario.getId().equals(fbUser.getUid())) {
+            if (usuario.getLatitude() != null && usuario.getLongitude() != null) {
+                Marker makerUsuario;
+                LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
+
+                if (usuariosLogados.get(usuario.getId()) != null) {
+                    if (usuariosLogadosMarker.get(usuario.getId()) == null) {
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .position(localizacaoUsuario)
+                                .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+
+                        makerUsuario = mMap.addMarker(markerOptions);
+                        makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
+                        mMap.setIndoorEnabled(true);
+
+                        usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
+
+                        mostrarUsuariosLogados();
+                    } else {
+                        makerUsuario = usuariosLogadosMarker.get(usuario.getId());
+                        new MarkerAnimation().animateMarkerToGB(makerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
+                    }
+                } else {
+                    MarkerOptions markerOptions = new MarkerOptions()
+                            .position(localizacaoUsuario)
+                            .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+
+                    makerUsuario = mMap.addMarker(markerOptions);
+                    makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
+                    mMap.setIndoorEnabled(true);
+
+                    usuariosLogados.put(usuario.getId(), usuario);
+                    usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
+
+                    mostrarUsuariosLogados();
+                }
+            }
+        }
+    }
+
+    private void mostrarUsuariosLogados() {
+        Query query = dataBaseReference.getRoot().child("usuarios").orderByChild("online").equalTo(Boolean.TRUE);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                LatLngBounds.Builder pointsBuilder = null;
+
+                for(DataSnapshot data: dataSnapshot.getChildren()) {
+                    Usuario usuario = data.getValue(Usuario.class);
+
+                    LatLng localizacaoUsuario  = new LatLng(usuario.getLatitude(), usuario.getLongitude());
+
+                    if(pointsBuilder == null) {
+                        pointsBuilder = new LatLngBounds.Builder();
+                    }
+                    pointsBuilder.include(localizacaoUsuario);
+                }
+
+                if(pointsBuilder != null) {
+                    MapUtils.aplicarZoomEntreVariasLocalizacoes(mMap, pointsBuilder);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void recuperarUsuario() {
         Query query = dataBaseReference.getRoot().child("usuarios").orderByChild("id").equalTo(fbUser.getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usuario = dataSnapshot.getValue(Usuario.class);
+                for(DataSnapshot data: dataSnapshot.getChildren()) {
+                    usuario = data.getValue(Usuario.class);
+                    if (usuarioMarker != null) {
+                        usuarioMarker.setTitle(usuario.getNome());
+                    }
+                }
             }
 
             @Override
@@ -209,7 +266,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        atualizarUsuarioParaOffline();
         mFusedLocationProviderClient.removeLocationUpdates(locationCallBack);
+    }
+
+    private void atualizarUsuarioParaOffline() {
+        final Map<String, Object> localizacao = new HashMap<>();
+        localizacao.put("online", Boolean.FALSE);
+
+        Query query = dataBaseReference.getRoot().child("usuarios").orderByChild("id").equalTo(fbUser.getUid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                dataSnapshot.getRef().child(fbUser.getUid()).updateChildren(localizacao);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private synchronized void setUpGClient() {
@@ -227,8 +303,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        capturarPosicaoCelular();
     }
 
     @Override
@@ -250,7 +324,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setIndoorEnabled(true);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 14.0f));
         } else {
-            usuarioMarker.setPosition(localizacaoAtual);
+            new MarkerAnimation().animateMarkerToGB(usuarioMarker, localizacaoAtual, new LatLngInterpolator.Linear());
         }
 
         atualizarPosicaoFireBase(localizacaoAtual);
@@ -260,6 +334,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final Map<String, Object> localizacao = new HashMap<>();
         localizacao.put("latitude", localizacaoAtual.latitude);
         localizacao.put("longitude", localizacaoAtual.longitude);
+        localizacao.put("online", Boolean.TRUE);
 
         Query query = dataBaseReference.getRoot().child("usuarios").orderByChild("id").equalTo(fbUser.getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
