@@ -22,9 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".activities.RegistrarActivity"
-            android:label="@string/title_activity_registrar"/>
+        <activity
+            android:name=".activities.RegistrarActivity"
+            android:label="@string/title_activity_registrar" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -32,7 +32,12 @@
 
         <activity
             android:name=".activities.MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+
+        <service
+            android:name=".services.CapturaLocalizacaoService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
