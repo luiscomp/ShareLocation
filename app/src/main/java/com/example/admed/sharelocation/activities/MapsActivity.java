@@ -1,6 +1,8 @@
 package com.example.admed.sharelocation.activities;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -11,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
 
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.objetos.Usuario;
@@ -270,10 +273,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Sair")
+                    .setMessage("Deseja fazer logout?")
+                    .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            FirebaseAuth.getInstance().signOut();
+                            dialog.dismiss();
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            finish();
+                        }
+                    })
+                    .create()
+                    .show();
+            return false;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
-        super.onDestroy();
         atualizarUsuarioParaOffline();
         mFusedLocationProviderClient.removeLocationUpdates(locationCallBack);
+        MapsActivity.super.onDestroy();
     }
 
     private void atualizarUsuarioParaOffline() {
