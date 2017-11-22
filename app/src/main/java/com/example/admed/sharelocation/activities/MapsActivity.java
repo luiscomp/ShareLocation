@@ -121,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void adicionarListenerDeAtualizacao() {
-        dataBaseReference.getRoot().child("usuarios").orderByChild("online").equalTo(Boolean.TRUE).addChildEventListener(new ChildEventListener() {
+        dataBaseReference.getRoot().child("usuarios").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 atualizarPosicaoUsuarioMapa(dataSnapshot.getValue(Usuario.class));
@@ -156,7 +156,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
 
                 if (usuariosLogados.get(usuario.getId()) != null) {
-                    if (usuariosLogadosMarker.get(usuario.getId()) == null) {
+                    if(usuario.getOnline()) {
+                        if (usuariosLogadosMarker.get(usuario.getId()) == null) {
+                            MarkerOptions markerOptions = new MarkerOptions()
+                                    .position(localizacaoUsuario)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+
+                            makerUsuario = mMap.addMarker(markerOptions);
+                            makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
+                            mMap.setIndoorEnabled(true);
+
+                            usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
+
+                            mostrarUsuariosLogados();
+                        } else {
+                            makerUsuario = usuariosLogadosMarker.get(usuario.getId());
+                            new MarkerAnimation().animateMarkerToGB(makerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
+                        }
+                    } else {
+                        usuariosLogadosMarker.get(usuario.getId()).remove();
+                    }
+                } else {
+                    if(usuario.getOnline()) {
                         MarkerOptions markerOptions = new MarkerOptions()
                                 .position(localizacaoUsuario)
                                 .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
@@ -165,26 +186,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
                         mMap.setIndoorEnabled(true);
 
+                        usuariosLogados.put(usuario.getId(), usuario);
                         usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
 
                         mostrarUsuariosLogados();
-                    } else {
-                        makerUsuario = usuariosLogadosMarker.get(usuario.getId());
-                        new MarkerAnimation().animateMarkerToGB(makerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
                     }
-                } else {
-                    MarkerOptions markerOptions = new MarkerOptions()
-                            .position(localizacaoUsuario)
-                            .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
-
-                    makerUsuario = mMap.addMarker(markerOptions);
-                    makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
-                    mMap.setIndoorEnabled(true);
-
-                    usuariosLogados.put(usuario.getId(), usuario);
-                    usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
-
-                    mostrarUsuariosLogados();
                 }
             }
         }
