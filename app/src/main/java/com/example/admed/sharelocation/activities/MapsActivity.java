@@ -177,6 +177,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             new MarkerAnimation().animateMarkerToGB(makerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
                         }
                     } else {
+                        usuariosLogados.remove(usuario.getId());
                         usuariosLogadosMarker.get(usuario.getId()).remove();
                     }
                 } else {
@@ -402,49 +403,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void capturarPosicaoCelular() {
-        if(googleApiClient!=null) {
-            if (googleApiClient.isConnected()) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    locationRequest = new LocationRequest();
-                    locationRequest.setInterval(3000);
-                    locationRequest.setFastestInterval(3000);
-                    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        if(googleApiClient != null && googleApiClient.isConnected()) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationRequest = new LocationRequest();
+                locationRequest.setInterval(3000);
+                locationRequest.setFastestInterval(3000);
+                locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-                    LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
-                    builder.setAlwaysShow(true);
+                LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+                builder.setAlwaysShow(true);
 
-                    mFusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallBack, null);
+                mFusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallBack, null);
 
-                    PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-                    result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-                        @Override
-                        public void onResult(LocationSettingsResult result) {
-                            final Status status = result.getStatus();
-                            switch (status.getStatusCode()) {
-                                case LocationSettingsStatusCodes.SUCCESS:
-                                    if (ContextCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                                        mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
-                                            @Override
-                                            public void onSuccess(Location location) {
-                                                marcarPosicaoNoMapa(location);
-                                            }
-                                        });
-                                    }
-                                    break;
-                                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                                    try {
-                                        status.startResolutionForResult(MapsActivity.this, RESULT_LOCALIZACAO_PERMISSION);
-                                    } catch (IntentSender.SendIntentException e) {
-                                        // Ignore the error.
-                                    }
-                                    break;
-                                case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+                result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+                    @Override
+                    public void onResult(LocationSettingsResult result) {
+                        final Status status = result.getStatus();
+                        switch (status.getStatusCode()) {
+                            case LocationSettingsStatusCodes.SUCCESS:
+                                if (ContextCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                    mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
+                                        @Override
+                                        public void onSuccess(Location location) {
+                                            marcarPosicaoNoMapa(location);
+                                        }
+                                    });
+                                }
+                                break;
+                            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                                try {
+                                    status.startResolutionForResult(MapsActivity.this, RESULT_LOCALIZACAO_PERMISSION);
+                                } catch (IntentSender.SendIntentException e) {
+                                    // Ignore the error.
+                                }
+                                break;
+                            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
 
-                                    break;
-                            }
+                                break;
                         }
-                    });
-                }
+                    }
+                });
             }
         }
     }
