@@ -44,7 +44,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -103,6 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
     };
+    private boolean singOut = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -274,50 +277,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Sair")
-                    .setMessage("Deseja fazer logout?")
-                    .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            FirebaseAuth.getInstance().signOut();
-                            dialog.dismiss();
-                            finish();
-                        }
-                    })
-                    .setNegativeButton("Não", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            finish();
-                        }
-                    })
-                    .create()
-                    .show();
-            return false;
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setTitle("Sair")
+                .setMessage("Deseja fazer logout?")
+                .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        singOut = true;
+                        dialog.dismiss();
+                        finish();
+                    }
+                })
+                .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        singOut = false;
+                        dialog.dismiss();
+                        finish();
+                    }
+                })
+                .create()
+                .show();
     }
 
     @Override
     protected void onDestroy() {
         atualizarUsuarioParaOffline();
         mFusedLocationProviderClient.removeLocationUpdates(locationCallBack);
-        MapsActivity.super.onDestroy();
+        super.onDestroy();
     }
 
     private void atualizarUsuarioParaOffline() {
-        final Map<String, Object> localizacao = new HashMap<>();
-        localizacao.put("online", Boolean.FALSE);
+        final Map<String, Object> online = new HashMap<>();
+        online.put("online", Boolean.FALSE);
 
         Query query = dataBaseReference.getRoot().child("usuarios").orderByChild("id").equalTo(fbUser.getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                dataSnapshot.getRef().child(fbUser.getUid()).updateChildren(localizacao);
+                dataSnapshot.getRef().child(fbUser.getUid()).updateChildren(online).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()) {
+                            if(singOut) {
+                                FirebaseAuth.getInstance().signOut();
+                            }
+                        }
+                    }
+                });
             }
 
             @Override

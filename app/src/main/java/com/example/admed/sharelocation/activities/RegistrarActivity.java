@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.admed.sharelocation.R;
+import com.example.admed.sharelocation.dialogs.ProgressDialog;
 import com.example.admed.sharelocation.objetos.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -68,6 +69,9 @@ public class RegistrarActivity extends AppCompatActivity {
 
 
     private void registrarNovoUsuario() {
+        final ProgressDialog dialog = ProgressDialog.newInstance(false);
+        dialog.show(getSupportFragmentManager(), "dialogLogin");
+
         mAuth.createUserWithEmailAndPassword(etEmail.getText().toString(), etSenha.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -85,6 +89,7 @@ public class RegistrarActivity extends AppCompatActivity {
                             usuariosReference.child(usuario.getId()).setValue(usuario);
 
                             chamarTelaMapa();
+                            dialog.dismiss();
                         } else {
                             Toast.makeText(RegistrarActivity.this, "Não foi possível registrar o usuário, tente novamente", Toast.LENGTH_SHORT).show();
                         }

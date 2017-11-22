@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.admed.sharelocation.R;
+import com.example.admed.sharelocation.dialogs.ProgressDialog;
 import com.example.admed.sharelocation.objetos.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -85,6 +86,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void logarUsuario() {
+        final ProgressDialog dialog = ProgressDialog.newInstance(false);
+        dialog.show(getSupportFragmentManager(), "dialogLogin");
+
         mAuth.signInWithEmailAndPassword(etEmail.getText().toString(), etSenha.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -92,6 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             chamarTelaMapa();
+                            dialog.dismiss();
                         } else {
                             AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
                             dialog.setTitle(getString(R.string.registrar_text))
