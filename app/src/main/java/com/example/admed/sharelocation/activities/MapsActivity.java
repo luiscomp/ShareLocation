@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -39,6 +41,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -57,14 +60,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
-    private GoogleMap mMap;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-    private static final int RESULT_LOCALIZACAO_PERMISSION = 1;
-
+        private static final int RESULT_LOCALIZACAO_PERMISSION = 1;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
@@ -106,6 +112,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     };
     private boolean singOut = false;
+
+    public static Bitmap getBitmapFromURL(String src) {
+        if(src.trim()!=""){
+            try {
+                URL url = new URL(src);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                Bitmap myBitmap = BitmapFactory.decodeStream(input);
+                return myBitmap;
+            } catch (IOException e) {
+                // Log exception
+                return null;
+            }
+        }
+        return null;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,9 +188,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (usuariosLogados.get(usuario.getId()) != null) {
                     if(usuario.getOnline()) {
                         if (usuariosLogadosMarker.get(usuario.getId()) == null) {
+                            Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
                             MarkerOptions markerOptions = new MarkerOptions()
                                     .position(localizacaoUsuario)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+                                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
 
                             makerUsuario = mMap.addMarker(markerOptions);
                             makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
@@ -185,9 +210,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 } else {
                     if(usuario.getOnline()) {
+                        Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
                         MarkerOptions markerOptions = new MarkerOptions()
                                 .position(localizacaoUsuario)
-                                .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+                                .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
 
                         makerUsuario = mMap.addMarker(markerOptions);
                         makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
@@ -362,9 +388,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         localizacaoAtual = new LatLng(location.getLatitude(), location.getLongitude());
 
         if(usuarioMarker == null) {
+            Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(localizacaoAtual)
-                    .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(this, R.drawable.eduardo)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
 
             usuarioMarker = mMap.addMarker(markerOptions);
             usuarioMarker.setTitle(usuario != null ? usuario.getNome() : "");
