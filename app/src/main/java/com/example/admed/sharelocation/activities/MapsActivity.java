@@ -15,7 +15,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.ImageView;
 
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.objetos.Usuario;
@@ -59,6 +61,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,8 +72,8 @@ import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
-        private static final int RESULT_LOCALIZACAO_PERMISSION = 1;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-private GoogleMap mMap;
+    private static final int RESULT_LOCALIZACAO_PERMISSION = 1;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+    private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
@@ -112,24 +115,6 @@ private GoogleMap mMap;
         }
     };
     private boolean singOut = false;
-
-    public static Bitmap getBitmapFromURL(String src) {
-        if(src.trim()!=""){
-            try {
-                URL url = new URL(src);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream input = connection.getInputStream();
-                Bitmap myBitmap = BitmapFactory.decodeStream(input);
-                return myBitmap;
-            } catch (IOException e) {
-                // Log exception
-                return null;
-            }
-        }
-        return null;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,10 +173,17 @@ private GoogleMap mMap;
                 if (usuariosLogados.get(usuario.getId()) != null) {
                     if(usuario.getOnline()) {
                         if (usuariosLogadosMarker.get(usuario.getId()) == null) {
-                            Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
+                            Bitmap b = null;
+                            if(usuario!=null && usuario.getPhoto().trim().length()>0) {
+                                Log.d("PICASSO","URL: "+usuario.getPhoto());
+                                ImageView im = new ImageView(MapsActivity.this);
+                                Picasso.with(MapsActivity.this).load(usuario.getPhoto()).into(im);
+                                im.buildDrawingCache();
+                                b = im.getDrawingCache();
+                            }
                             MarkerOptions markerOptions = new MarkerOptions()
                                     .position(localizacaoUsuario)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+                                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.user)));
 
                             makerUsuario = mMap.addMarker(markerOptions);
                             makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
@@ -210,10 +202,17 @@ private GoogleMap mMap;
                     }
                 } else {
                     if(usuario.getOnline()) {
-                        Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
+                        Bitmap b = null;
+                        if(usuario!=null && usuario.getPhoto().trim().length()>0) {
+                            Log.d("PICASSO","URL: "+usuario.getPhoto());
+                            ImageView im = new ImageView(MapsActivity.this);
+                            Picasso.with(MapsActivity.this).load(usuario.getPhoto()).into(im);
+                            im.buildDrawingCache();
+                            b = im.getDrawingCache();
+                        }
                         MarkerOptions markerOptions = new MarkerOptions()
                                 .position(localizacaoUsuario)
-                                .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+                                .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.user)));
 
                         makerUsuario = mMap.addMarker(markerOptions);
                         makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
@@ -388,10 +387,17 @@ private GoogleMap mMap;
         localizacaoAtual = new LatLng(location.getLatitude(), location.getLongitude());
 
         if(usuarioMarker == null) {
-            Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
+            Bitmap b = null;
+            if(usuario!=null && usuario.getPhoto().trim().length()>0) {
+                Log.d("PICASSO","URL: "+usuario.getPhoto());
+                ImageView im = new ImageView(MapsActivity.this);
+                Picasso.with(MapsActivity.this).load(usuario.getPhoto()).into(im);
+                im.buildDrawingCache();
+                b = im.getDrawingCache();
+            }
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(localizacaoAtual)
-                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.user)));
 
             usuarioMarker = mMap.addMarker(markerOptions);
             usuarioMarker.setTitle(usuario != null ? usuario.getNome() : "");
