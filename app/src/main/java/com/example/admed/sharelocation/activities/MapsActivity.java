@@ -78,8 +78,8 @@ import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
-        private static final int RESULT_LOCALIZACAO_PERMISSION = 1;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-private GoogleMap mMap;
+    private static final int RESULT_LOCALIZACAO_PERMISSION = 1;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+    private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
