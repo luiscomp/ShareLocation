@@ -408,6 +408,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setIndoorEnabled(true);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 14.0f));
         } else {
+            if(usuario != null) {
+                PhotoMarker marker = new PhotoMarker();
+                marker.setMarker(usuarioMarker);
+                marker.setUri(Uri.parse(usuario.getPhoto()));
+
+                new SetarFotoMarkerTask().execute(marker);
+            }
+
             new MarkerAnimation().animateMarkerToGB(usuarioMarker, localizacaoAtual, new LatLngInterpolator.Linear());
         }
 

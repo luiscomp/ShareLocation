@@ -247,6 +247,8 @@ public class RegistrarActivity extends AppCompatActivity {
     }
 
     private void uploadFirebase (Bitmap bitmap){
+        bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();

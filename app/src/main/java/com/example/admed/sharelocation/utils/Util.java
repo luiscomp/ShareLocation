@@ -26,7 +26,7 @@ public class Util {
         ImageView markerImageView = customMarkerView.findViewById(R.id.profile_image);
 
         if(imagem != null) {
-            markerImageView.setImageDrawable(new BitmapDrawable(context.getResources(), imagem));
+            markerImageView.setImageBitmap(Bitmap.createScaledBitmap(imagem, 100, 100, false));
         } else {
             markerImageView.setImageResource(resId);
         }

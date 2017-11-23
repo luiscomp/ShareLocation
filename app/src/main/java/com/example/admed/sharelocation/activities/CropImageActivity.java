@@ -34,8 +34,9 @@ public class CropImageActivity extends AppCompatActivity {
     private void instanciarComponentes() {
         mCropView = findViewById(R.id.cropImageView);
         mCropView.setCropMode(CropImageView.CropMode.CIRCLE_SQUARE);
+        mCropView.setOutputMaxSize(265, 265);
         mCropView.setCompressFormat(Bitmap.CompressFormat.JPEG);
-        mCropView.setCompressQuality(50);
+        mCropView.setCompressQuality(100);
 
         final Uri imagem = Uri.parse(getIntent().getExtras().getString("urlImagem"));
 
@@ -57,7 +58,6 @@ public class CropImageActivity extends AppCompatActivity {
                 mCropView.crop(imagem).execute(new CropCallback() {
                     @Override
                     public void onSuccess(Bitmap cropped) {
-
                         FotoSingleton.getInstance().foto = cropped;
                         setResult(1);
                         finish();
