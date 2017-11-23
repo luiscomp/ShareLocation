@@ -71,10 +71,15 @@ public class MapUtils {
         });
     }
 
-    public static void aplicarZoomEntreVariasLocalizacoes(GoogleMap mapa, LatLngBounds.Builder pointsBuilder) {
+    public static void aplicarZoomEntreVariasLocalizacoes(GoogleMap mapa, LatLngBounds.Builder pointsBuilder, Context context) {
         LatLngBounds bounds = pointsBuilder.build();
 
-        mapa.animateCamera(newLatLngBounds(bounds, 400), 1500, null);
+        final int width = context.getResources().getDisplayMetrics().widthPixels;
+        final int height = context.getResources().getDisplayMetrics().heightPixels;
+        final int minMetric = Math.min(width, height);
+        final int padding = (int) (minMetric * 0.40);
+
+        mapa.animateCamera(newLatLngBounds(bounds, padding), 1500, null);
     }
 
     public void removerRotaNoMapa() {

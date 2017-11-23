@@ -222,7 +222,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
                 if(pointsBuilder != null) {
-                    MapUtils.aplicarZoomEntreVariasLocalizacoes(mMap, pointsBuilder);
+                    MapUtils.aplicarZoomEntreVariasLocalizacoes(mMap, pointsBuilder, MapsActivity.this);
                 }
             }
 
@@ -279,9 +279,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
-                .setTitle("Sair")
-                .setMessage("Deseja fazer logout?")
-                .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.sair_text))
+                .setMessage(getString(R.string.fazer_logout_text))
+                .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         singOut = true;
@@ -289,7 +289,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         finish();
                     }
                 })
-                .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                .setNegativeButton(getString(R.string.nao_text), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         singOut = false;

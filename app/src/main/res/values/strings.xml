@@ -16,4 +16,12 @@
     <string name="nome_invalido_text">Informe um nome</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_registrar">Registrar</string>
+    <string name="email_ja_cadastrado_text">Email já cadastrado</string>
+    <string name="ops_text">Ops!</string>
+    <string name="ok_text">OK</string>
+    <string name="nao_e_possivel_registrar_usuario">Não foi possível registrar o usuário, tente novamente</string>
+    <string name="sim_text">Sim</string>
+    <string name="nao_text">Não</string>
+    <string name="sair_text">Sair</string>
+    <string name="fazer_logout_text">Deseja fazer logout?</string>
 </resources>

@@ -1,8 +1,10 @@
 package com.example.admed.sharelocation.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +19,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.ProviderQueryResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -30,6 +33,8 @@ public class RegistrarActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference usuariosReference = FirebaseDatabase.getInstance().getReference("usuarios");
+
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +74,34 @@ public class RegistrarActivity extends AppCompatActivity {
 
 
     private void registrarNovoUsuario() {
-        final ProgressDialog dialog = ProgressDialog.newInstance(false);
-        dialog.show(getSupportFragmentManager(), "dialogLogin");
+        progressDialog = ProgressDialog.newInstance(false);
+        progressDialog.show(getSupportFragmentManager(), "dialogLogin");
 
+        mAuth.fetchProvidersForEmail(etEmail.getText().toString()).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
+            @Override
+            public void onComplete(@NonNull Task<ProviderQueryResult> task) {
+                if(task.isSuccessful() && task.getResult().getProviders().size() == 0 ) {
+                    concluirRegistroNovoUsuario();
+                } else {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(RegistrarActivity.this);
+                    dialog.setTitle(getString(R.string.ops_text))
+                            .setMessage(getString(R.string.email_ja_cadastrado_text))
+                            .setPositiveButton(getString(R.string.ok_text), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            })
+                            .create()
+                            .show();
+
+                    progressDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    private void concluirRegistroNovoUsuario() {
         mAuth.createUserWithEmailAndPassword(etEmail.getText().toString(), etSenha.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -89,10 +119,10 @@ public class RegistrarActivity extends AppCompatActivity {
                             usuariosReference.child(usuario.getId()).setValue(usuario);
 
                             chamarTelaMapa();
-                            dialog.dismiss();
                         } else {
-                            Toast.makeText(RegistrarActivity.this, "Não foi possível registrar o usuário, tente novamente", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegistrarActivity.this, getString(R.string.nao_e_possivel_registrar_usuario), Toast.LENGTH_SHORT).show();
                         }
+                        progressDialog.dismiss();
                     }
                 });
     }

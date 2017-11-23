@@ -101,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
                             AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
                             dialog.setTitle(getString(R.string.registrar_text))
                                     .setMessage(getString(R.string.usuario_nao_encontrado_text))
-                                    .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+                                    .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) {
                                             registrarUsuario();
