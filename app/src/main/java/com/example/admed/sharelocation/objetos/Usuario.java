@@ -8,6 +8,17 @@ import android.os.Parcelable;
  */
 
 public class Usuario implements Parcelable {
+    public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
+        @Override
+        public Usuario createFromParcel(Parcel in) {
+            return new Usuario(in);
+        }
+
+        @Override
+        public Usuario[] newArray(int size) {
+            return new Usuario[size];
+        }
+    };
     private String id;
     private String nome;
     private String email;
@@ -15,6 +26,7 @@ public class Usuario implements Parcelable {
     private Double latitude;
     private Double longitude;
     private Boolean online;
+    private String photo;
 
     public Usuario() {
     }
@@ -24,6 +36,7 @@ public class Usuario implements Parcelable {
         nome = in.readString();
         email = in.readString();
         senha = in.readString();
+        photo = in.readString();
         if (in.readByte() == 0) {
             latitude = null;
         } else {
@@ -37,18 +50,6 @@ public class Usuario implements Parcelable {
         byte tmpOnline = in.readByte();
         online = tmpOnline == 0 ? null : tmpOnline == 1;
     }
-
-    public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
-        @Override
-        public Usuario createFromParcel(Parcel in) {
-            return new Usuario(in);
-        }
-
-        @Override
-        public Usuario[] newArray(int size) {
-            return new Usuario[size];
-        }
-    };
 
     public String getId() {
         return id;
@@ -104,6 +105,14 @@ public class Usuario implements Parcelable {
 
     public void setOnline(Boolean online) {
         this.online = online;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     @Override

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "753923948588-hltfg35l04jrbjnk6dl0cs2pnhmoreu4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.admed.sharelocation",
+            "certificate_hash": "36036d29bfb242c96a55d76270240022cd58de97"
+          }
+        },
+        {
           "client_id": "753923948588-q1h36knd3ujsc4ct34fmffb9gats3u3u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
