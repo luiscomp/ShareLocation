@@ -17,7 +17,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.objetos.Usuario;
@@ -62,7 +61,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
