@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
+    android:background="@color/bgColorDark"
     tools:context="com.example.admed.sharelocation.activities.CropImageActivity">
 
 
@@ -14,12 +15,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:padding="@dimen/default_padding"
+        android:padding="@dimen/crop_imagem_padding"
         custom:scv_crop_mode="circle_square"
         custom:scv_background_color="@color/bgColorDark"
         custom:scv_handle_color="@color/bgColorLight"
         custom:scv_guide_color="@color/bgColorLight"
-        custom:scv_overlay_color="@color/bgColorLight"
+        custom:scv_overlay_color="@color/bgColorDark"
         custom:scv_frame_color="@color/bgColorLight"
         custom:scv_handle_size="14dp"
         custom:scv_touch_padding="8dp"

@@ -1,3 +1,4 @@
 <resources>
     <dimen name="default_padding">10dp</dimen>
+    <dimen name="crop_imagem_padding">20dp</dimen>
 </resources>

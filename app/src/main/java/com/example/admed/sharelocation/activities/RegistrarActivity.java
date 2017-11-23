@@ -255,7 +255,8 @@ public class RegistrarActivity extends AppCompatActivity {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
+                Toast.makeText(RegistrarActivity.this, "Falha ao Cadastrar, tente novamente!", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override

@@ -24,4 +24,5 @@
     <string name="nao_text">Não</string>
     <string name="sair_text">Sair</string>
     <string name="fazer_logout_text">Deseja fazer logout?</string>
+    <string name="title_activity_cortar_foto">Cortar Foto</string>
 </resources>

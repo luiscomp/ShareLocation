@@ -42,7 +42,9 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".activities.CropImageActivity"></activity>
+        <activity
+            android:name=".activities.CropImageActivity"
+            android:label="@string/title_activity_cortar_foto"></activity>
     </application>
 
 </manifest>
