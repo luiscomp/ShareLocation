@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.view.LayoutInflater;
@@ -13,15 +14,23 @@ import android.widget.ImageView;
 
 import com.example.admed.sharelocation.R;
 
+import java.util.Random;
+
 /**
  * Created by Pichau on 21/11/2017.
  */
 
 public class Util {
-    public static Bitmap getMarkerBitmapFromView(Context context, @DrawableRes int resId) {
+    public static Bitmap getMarkerBitmapFromView(Context context, @DrawableRes int resId, Bitmap imagem) {
         View customMarkerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_custom_marker, null);
         ImageView markerImageView = customMarkerView.findViewById(R.id.profile_image);
-        markerImageView.setImageResource(resId);
+
+        if(imagem != null) {
+            markerImageView.setImageDrawable(new BitmapDrawable(context.getResources(), imagem));
+        } else {
+            markerImageView.setImageResource(resId);
+        }
+
         customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
         customMarkerView.buildDrawingCache();
@@ -34,5 +43,10 @@ public class Util {
         }
         customMarkerView.draw(canvas);
         return returnedBitmap;
+    }
+
+    public static int getRandomNumber() {
+        Random randomGenerator = new Random();
+        return randomGenerator.nextInt(999999999);
     }
 }

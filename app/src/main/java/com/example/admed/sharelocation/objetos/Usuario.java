@@ -8,17 +8,6 @@ import android.os.Parcelable;
  */
 
 public class Usuario implements Parcelable {
-    public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
-        @Override
-        public Usuario createFromParcel(Parcel in) {
-            return new Usuario(in);
-        }
-
-        @Override
-        public Usuario[] newArray(int size) {
-            return new Usuario[size];
-        }
-    };
     private String id;
     private String nome;
     private String email;
@@ -30,6 +19,18 @@ public class Usuario implements Parcelable {
 
     public Usuario() {
     }
+
+    public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
+        @Override
+        public Usuario createFromParcel(Parcel in) {
+            return new Usuario(in);
+        }
+
+        @Override
+        public Usuario[] newArray(int size) {
+            return new Usuario[size];
+        }
+    };
 
     protected Usuario(Parcel in) {
         id = in.readString();
@@ -126,6 +127,7 @@ public class Usuario implements Parcelable {
         dest.writeString(nome);
         dest.writeString(email);
         dest.writeString(senha);
+        dest.writeString(photo);
         if (latitude == null) {
             dest.writeByte((byte) 0);
         } else {

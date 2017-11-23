@@ -8,17 +8,24 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.objetos.Usuario;
+import com.example.admed.sharelocation.utils.Permissoes;
+import com.example.admed.sharelocation.utils.PhotoMarker;
 import com.example.admed.sharelocation.utils.Util;
 import com.example.admed.sharelocation.utils.mapsutil.LatLngInterpolator;
 import com.example.admed.sharelocation.utils.mapsutil.MapUtils;
@@ -59,6 +66,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,6 +87,7 @@ private GoogleMap mMap;
     private Marker usuarioMarker;
     private FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
     private Usuario usuario;
+    private boolean singOut = false;
 
     private DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
 
@@ -111,36 +121,21 @@ private GoogleMap mMap;
 
         }
     };
-    private boolean singOut = false;
-
-    public static Bitmap getBitmapFromURL(String src) {
-        if(src.trim()!=""){
-            try {
-                URL url = new URL(src);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream input = connection.getInputStream();
-                Bitmap myBitmap = BitmapFactory.decodeStream(input);
-                return myBitmap;
-            } catch (IOException e) {
-                // Log exception
-                return null;
-            }
-        }
-        return null;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        recuperarUsuario();
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         setUpGClient();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        recuperarUsuario();
     }
 
     @Override
@@ -179,29 +174,41 @@ private GoogleMap mMap;
         });
     }
 
-    private void atualizarPosicaoUsuarioMapa(Usuario usuario) {
+    private void atualizarPosicaoUsuarioMapa(final Usuario usuario) {
         if (!usuario.getId().equals(fbUser.getUid())) {
             if (usuario.getLatitude() != null && usuario.getLongitude() != null) {
-                Marker makerUsuario;
-                LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
-
                 if (usuariosLogados.get(usuario.getId()) != null) {
                     if(usuario.getOnline()) {
                         if (usuariosLogadosMarker.get(usuario.getId()) == null) {
-                            Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
-                            MarkerOptions markerOptions = new MarkerOptions()
-                                    .position(localizacaoUsuario)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+                            Marker makerUsuario;
+                            final LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
 
+                            MarkerOptions markerOptions = new MarkerOptions().position(localizacaoUsuario);
                             makerUsuario = mMap.addMarker(markerOptions);
                             makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
                             mMap.setIndoorEnabled(true);
+
+                            PhotoMarker marker = new PhotoMarker();
+                            marker.setMarker(makerUsuario);
+                            marker.setUri(Uri.parse(usuario.getPhoto()));
+
+                            new SetarFotoMarkerTask().execute(marker);
 
                             usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
 
                             mostrarUsuariosLogados();
                         } else {
+                            Marker makerUsuario;
+                            final LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
+
                             makerUsuario = usuariosLogadosMarker.get(usuario.getId());
+
+                            PhotoMarker marker = new PhotoMarker();
+                            marker.setMarker(makerUsuario);
+                            marker.setUri(Uri.parse(usuario.getPhoto()));
+
+                            new SetarFotoMarkerTask().execute(marker);
+
                             new MarkerAnimation().animateMarkerToGB(makerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
                         }
                     } else {
@@ -210,14 +217,19 @@ private GoogleMap mMap;
                     }
                 } else {
                     if(usuario.getOnline()) {
-                        Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
-                        MarkerOptions markerOptions = new MarkerOptions()
-                                .position(localizacaoUsuario)
-                                .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+                        Marker makerUsuario;
+                        LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
 
+                        MarkerOptions markerOptions = new MarkerOptions().position(localizacaoUsuario);
                         makerUsuario = mMap.addMarker(markerOptions);
                         makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
                         mMap.setIndoorEnabled(true);
+
+                        PhotoMarker marker = new PhotoMarker();
+                        marker.setMarker(makerUsuario);
+                        marker.setUri(Uri.parse(usuario.getPhoto()));
+
+                        new SetarFotoMarkerTask().execute(marker);
 
                         usuariosLogados.put(usuario.getId(), usuario);
                         usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
@@ -268,6 +280,12 @@ private GoogleMap mMap;
                     usuario = data.getValue(Usuario.class);
                     if (usuarioMarker != null) {
                         usuarioMarker.setTitle(usuario.getNome());
+
+                        PhotoMarker marker = new PhotoMarker();
+                        marker.setMarker(usuarioMarker);
+                        marker.setUri(Uri.parse(usuario.getPhoto()));
+
+                        new SetarFotoMarkerTask().execute(marker);
                     }
                 }
             }
@@ -280,8 +298,7 @@ private GoogleMap mMap;
     }
 
     private void verificarPermissao() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (Permissoes.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) && Permissoes.isGranted(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
             capturarPosicaoCelular();
         } else {
             ActivityCompat.requestPermissions(this, permissoesLocalizacao, RESULT_LOCALIZACAO_PERMISSION);
@@ -293,8 +310,7 @@ private GoogleMap mMap;
         switch (requestCode) {
             case RESULT_LOCALIZACAO_PERMISSION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (Permissoes.isGranted(this, Manifest.permission.ACCESS_FINE_LOCATION) && Permissoes.isGranted(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
                         capturarPosicaoCelular();
                     }
                 }
@@ -388,10 +404,9 @@ private GoogleMap mMap;
         localizacaoAtual = new LatLng(location.getLatitude(), location.getLongitude());
 
         if(usuarioMarker == null) {
-            Bitmap b = getBitmapFromURL(usuario != null ? usuario.getPhoto() : "");
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(localizacaoAtual)
-                    .icon(BitmapDescriptorFactory.fromBitmap(b!=null? b : Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.eduardo)));
+            MarkerOptions markerOptions = null;
+            markerOptions = new MarkerOptions().position(localizacaoAtual)
+                    .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
 
             usuarioMarker = mMap.addMarker(markerOptions);
             usuarioMarker.setTitle(usuario != null ? usuario.getNome() : "");
@@ -480,6 +495,26 @@ private GoogleMap mMap;
                     }
                 });
             }
+        }
+    }
+
+    private class SetarFotoMarkerTask extends AsyncTask<PhotoMarker, Void, Void> {
+        @Override
+        protected Void doInBackground(final PhotoMarker... photoMarkers) {
+            try {
+                final Bitmap bpm = Picasso.with(MapsActivity.this).load(photoMarkers[0].getUri()).get();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        photoMarkers[0].getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, bpm)));
+                    }
+                });
+            } catch (IOException e) {
+                Log.e("Picasso", e.getMessage());
+            }
+
+            return null;
         }
     }
 }

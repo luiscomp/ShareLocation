@@ -6,5 +6,6 @@
     <color name="bgColorLight">#44BD92</color>
     <color name="bgColorDark">#288767</color>
     <color name="colorWhite">#FFFFFF</color>
+    <color name="colorBlack">#000000</color>
 
 </resources>

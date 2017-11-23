@@ -17,13 +17,14 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ImageView
+            <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
+                android:layout_marginBottom="10dp"
+                android:src="@drawable/ic_launcher_background"
                 android:layout_weight="1"
-                app:srcCompat="@mipmap/ic_launcher"
-                tools:ignore="ContentDescription" />
+                app:riv_corner_radius="100dp"/>
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"

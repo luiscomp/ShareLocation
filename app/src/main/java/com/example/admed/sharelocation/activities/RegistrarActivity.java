@@ -1,16 +1,15 @@
 package com.example.admed.sharelocation.activities;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,6 +19,9 @@ import android.widget.Toast;
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.dialogs.ProgressDialog;
 import com.example.admed.sharelocation.objetos.Usuario;
+import com.example.admed.sharelocation.singletons.FotoSingleton;
+import com.example.admed.sharelocation.utils.Criptografia;
+import com.example.admed.sharelocation.utils.Permissoes;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,27 +37,33 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class RegistrarActivity extends AppCompatActivity {
 
-    private static final int SELECT_PHOTO = 3;
-    ImageView imageView;
-    Bitmap croppedBitmap;
+    private String[] permissoesGaleria = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+    private static final int REQUEST_PERMISSION_GALERY = 1;
+    private static final int REQUEST_CROPED_IMAGE = 2;
+    private static final int REQUEST_SELECT_PHOTO = 3;
+
+    private ImageView imageView;
+    private Bitmap croppedBitmap;
+
+    private Usuario usuario = new Usuario();
+
     private EditText etNome;
     private EditText etEmail;
     private EditText etSenha;
     private EditText etConfirmarSenha;
     private Button btnRegistrar;
+
+    private StorageReference storage;
     private FirebaseAuth mAuth;
     private DatabaseReference usuariosReference = FirebaseDatabase.getInstance().getReference("usuarios");
     private ProgressDialog progressDialog;
-    private Uri downloadUrl;
-    private Uri contentURI;
-    private StorageReference storage;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +105,7 @@ public class RegistrarActivity extends AppCompatActivity {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                choosePhotoFromGallary();
+                selecionarFotoDaGaleria();
             }
         });
     }
@@ -111,10 +119,8 @@ public class RegistrarActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<ProviderQueryResult> task) {
                 if(task.isSuccessful() && task.getResult().getProviders().size() == 0 ) {
-                    if(croppedBitmap!=null){
+                    if(croppedBitmap != null){
                         uploadFirebase(croppedBitmap);
-                    }else{
-                        concluirRegistroNovoUsuario();
                     }
                 } else {
                     AlertDialog.Builder dialog = new AlertDialog.Builder(RegistrarActivity.this);
@@ -143,13 +149,10 @@ public class RegistrarActivity extends AppCompatActivity {
                         if(task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
 
-                            Usuario usuario = new Usuario();
                             usuario.setId(user.getUid());
                             usuario.setNome(etNome.getText().toString());
                             usuario.setEmail(etEmail.getText().toString());
                             usuario.setSenha(etSenha.getText().toString());
-                            usuario.setPhoto((downloadUrl!=null) ? downloadUrl.toString() : "");
-
 
                             usuariosReference.child(usuario.getId()).setValue(usuario);
 
@@ -199,66 +202,63 @@ public class RegistrarActivity extends AppCompatActivity {
             return false;
         }
 
+        if(croppedBitmap == null) {
+            Toast.makeText(this, "Favor, escolha uma foto de perfil.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         return true;
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SELECT_PHOTO) {
+        if (requestCode == REQUEST_SELECT_PHOTO) {
             if (data != null) {
-                contentURI = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    Matrix matrix = new Matrix();
-                    matrix.postScale(0.9f, 0.9f);
-                    croppedBitmap = Bitmap.createBitmap(bitmap, 300, 300,300, 300, matrix, true);
-                    imageView.setImageBitmap(croppedBitmap);
-                    //uploadFirebase();
-                    //cropImage(contentURI);
-                } catch (IOException e) {
-                    //Log.d("FIREBASE",e.getMessage());
-                    Toast.makeText(RegistrarActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-                }
+                Uri contentURI = data.getData();
+
+                Intent intent = new Intent(this, CropImageActivity.class);
+                intent.putExtra("urlImagem", contentURI.toString());
+                startActivityForResult(intent, REQUEST_CROPED_IMAGE);
+            }
+        } else if(requestCode == REQUEST_CROPED_IMAGE) {
+            if(resultCode == 1) {
+                croppedBitmap = FotoSingleton.getInstance().foto;
+                imageView.setImageBitmap(FotoSingleton.getInstance().foto);
             }
         }
     }
 
-    public void choosePhotoFromGallary() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, SELECT_PHOTO);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSION_GALERY) {
+            selecionarFotoDaGaleria();
+        }
+    }
+
+    public void selecionarFotoDaGaleria() {
+        if(Permissoes.isGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(galleryIntent, REQUEST_SELECT_PHOTO);
+        } else {
+            ActivityCompat.requestPermissions(this, permissoesGaleria, REQUEST_PERMISSION_GALERY);
+        }
     }
 
     private void uploadFirebase (Bitmap bitmap){
-        String s = contentURI.getPath().toString();
-        MessageDigest m = null;
-        try {
-            m = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        m.update(s.getBytes(),0,s.length());
-        StorageReference riversRef = storage.child("images/"+new BigInteger(1,m.digest()).toString(16)+".jpg");
-        //riversRef.putFile(contentURI);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-
-        UploadTask uploadTask = riversRef.putBytes(byteArray);
-
-        uploadTask .addOnFailureListener(new OnFailureListener() {
+        UploadTask uploadTask = storage.child("imagens/"+ Criptografia.criptografarMD5(String.valueOf(Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis()))+".jpg").putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle unsuccessful uploads
-                Toast.makeText(RegistrarActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-                concluirRegistroNovoUsuario();
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                Toast.makeText(RegistrarActivity.this, "Upload success!", Toast.LENGTH_SHORT).show();
-                downloadUrl = taskSnapshot.getDownloadUrl();
+                usuario.setPhoto(taskSnapshot.getDownloadUrl().toString());
                 concluirRegistroNovoUsuario();
             }
         });
