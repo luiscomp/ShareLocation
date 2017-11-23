@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -64,6 +65,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -492,19 +496,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private class SetarFotoMarkerTask extends AsyncTask<PhotoMarker, Void, Void> {
         @Override
         protected Void doInBackground(final PhotoMarker... photoMarkers) {
-            try {
-                final Bitmap bpm = Picasso.with(MapsActivity.this).load(photoMarkers[0].getUri()).get();
+            final Bitmap bpm = getBitmapFromURL(photoMarkers[0].getUri().toString());
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        photoMarkers[0].getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, bpm)));
-                    }
-                });
-            } catch (IOException e) {
-                Log.e("Picasso", e.getMessage());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    photoMarkers[0].getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, bpm)));
+                }
+            });
+
+            return null;
+        }
+
+        private Bitmap getBitmapFromURL(String src) {
+            if(src.trim() != ""){
+                try {
+                    URL url = new URL(src);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    Bitmap myBitmap = BitmapFactory.decodeStream(input);
+                    return myBitmap;
+                } catch (IOException e) {
+                    return null;
+                }
             }
-
             return null;
         }
     }

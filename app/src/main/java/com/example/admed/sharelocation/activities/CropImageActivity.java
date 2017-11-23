@@ -35,7 +35,7 @@ public class CropImageActivity extends AppCompatActivity {
         mCropView = findViewById(R.id.cropImageView);
         mCropView.setCropMode(CropImageView.CropMode.CIRCLE_SQUARE);
         mCropView.setCompressFormat(Bitmap.CompressFormat.JPEG);
-        mCropView.setCompressQuality(100);
+        mCropView.setCompressQuality(50);
 
         final Uri imagem = Uri.parse(getIntent().getExtras().getString("urlImagem"));
 

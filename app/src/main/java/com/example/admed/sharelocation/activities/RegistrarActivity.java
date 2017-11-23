@@ -231,12 +231,14 @@ public class RegistrarActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSION_GALERY) {
-            selecionarFotoDaGaleria();
+            if(Permissoes.isGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) && Permissoes.isGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                selecionarFotoDaGaleria();
+            }
         }
     }
 
     public void selecionarFotoDaGaleria() {
-        if(Permissoes.isGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if(Permissoes.isGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) && Permissoes.isGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
             Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(galleryIntent, REQUEST_SELECT_PHOTO);
         } else {
