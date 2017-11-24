@@ -18,9 +18,13 @@ import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.dialogs.ProgressDialog;
 import com.example.admed.sharelocation.objetos.Usuario;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
@@ -85,8 +89,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void logarUsuario() {
-        final ProgressDialog dialog = ProgressDialog.newInstance(false);
-        dialog.show(getSupportFragmentManager(), "dialogLogin");
+        final ProgressDialog loginDialog = ProgressDialog.newInstance(false);
+        loginDialog.show(getSupportFragmentManager(), "dialogLogin");
 
         mAuth.signInWithEmailAndPassword(etEmail.getText().toString(), etSenha.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -95,20 +99,47 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             chamarTelaMapa();
-                            dialog.dismiss();
                         } else {
-                            AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
-                            dialog.setTitle(getString(R.string.registrar_text))
-                                    .setMessage(getString(R.string.usuario_nao_encontrado_text))
-                                    .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            registrarUsuario();
-                                        }
-                                    })
-                                    .create()
-                                    .show();
+                            if(task.getException() instanceof FirebaseNetworkException) {
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
+                                dialog.setTitle(getString(R.string.conexao_text))
+                                        .setMessage(getString(R.string.falha_na_conexao_internet_text))
+                                        .setPositiveButton(getString(R.string.ok_text), new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                registrarUsuario();
+                                            }
+                                        })
+                                        .create()
+                                        .show();
+                            } else if(task.getException() instanceof FirebaseAuthInvalidUserException ||
+                                      task.getException() instanceof FirebaseAuthInvalidCredentialsException){
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
+                                dialog.setTitle(getString(R.string.registrar_text))
+                                        .setMessage(getString(R.string.usuario_nao_encontrado_text))
+                                        .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                registrarUsuario();
+                                            }
+                                        })
+                                        .create()
+                                        .show();
+                            } else {
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
+                                dialog.setTitle(getString(R.string.comunicacao_text))
+                                        .setMessage(getString(R.string.falha_na_comunicacao_com_o_servidor_text))
+                                        .setPositiveButton(getString(R.string.ok_text), new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                registrarUsuario();
+                                            }
+                                        })
+                                        .create()
+                                        .show();
+                            }
                         }
+                        loginDialog.dismiss();
                     }
                 });
     }

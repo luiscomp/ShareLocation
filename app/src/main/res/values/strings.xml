@@ -7,7 +7,7 @@
     <string name="registrar_text">Registrar</string>
     <string name="login_ou_registrar_text">Entrar ou Registrar</string>
     <string name="concluir_text">Concluir</string>
-    <string name="usuario_nao_encontrado_text">Não encontramos nenhum usuário com o login e senha informada, deseja registrar um novo com as credenciais informadas?</string>
+    <string name="usuario_nao_encontrado_text">Não encontramos nenhum usuário com as credenciais informadas, deseja se cadastrar?</string>
     <string name="confirmar_senha_text">Confirme sua senha</string>
     <string name="email_invalido_text">Email inválido</string>
     <string name="senha_invalida_text">Senha inválida</string>
@@ -25,4 +25,9 @@
     <string name="sair_text">Sair</string>
     <string name="fazer_logout_text">Deseja fazer logout?</string>
     <string name="title_activity_cortar_foto">Cortar Foto</string>
+    <string name="nao_foi_possivel_efetuar_login_text">Não foi possível efetuar o login, tente novamente!</string>
+    <string name="conexao_text">Conexão</string>
+    <string name="falha_na_conexao_internet_text">Não foi possível estabelecer uma conexão com a internet, favor verifique seus dados e tente novamente</string>
+    <string name="comunicacao_text">Comunicação</string>
+    <string name="falha_na_comunicacao_com_o_servidor_text">Falha na comunicação com o servidor, tente novamente</string>
 </resources>
