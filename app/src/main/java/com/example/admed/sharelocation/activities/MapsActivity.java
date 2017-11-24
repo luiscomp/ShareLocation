@@ -78,7 +78,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingActionButton menuSair;
 
 
-    private static final int RESULT_LOCALIZACAO_PERMISSION = 1;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+    private static final int RESULT_LOCALIZACAO_PERMISSION = 1;
+    private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private GoogleApiClient googleApiClient;
@@ -139,6 +140,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void instanciarComponentes() {
         menuPerfil = findViewById(R.id.menuPerfil);
+        menuPerfil.setEnabled(false);
         menuPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -227,36 +229,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (usuariosLogados.get(usuario.getId()) != null) {
                     if(usuario.getOnline()) {
                         if (usuariosLogadosMarker.get(usuario.getId()) == null) {
-                            Marker makerUsuario;
+                            Marker markerUsuario;
                             final LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
 
                             MarkerOptions markerOptions = new MarkerOptions().position(localizacaoUsuario);
-                            makerUsuario = mMap.addMarker(markerOptions);
-                            makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
+                            markerUsuario = mMap.addMarker(markerOptions);
+                            markerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
                             mMap.setIndoorEnabled(true);
 
                             PhotoMarker marker = new PhotoMarker();
-                            marker.setMarker(makerUsuario);
+                            marker.setUsuario(usuario);
+                            marker.setMarker(markerUsuario);
                             marker.setUri(Uri.parse(usuario.getPhoto()));
 
+                            markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
                             new SetarFotoMarkerTask().execute(marker);
 
-                            usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
+                            usuariosLogadosMarker.put(usuario.getId(), markerUsuario);
 
                             mostrarUsuariosLogados();
                         } else {
-                            Marker makerUsuario;
+                            Marker markerUsuario;
                             final LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
 
-                            makerUsuario = usuariosLogadosMarker.get(usuario.getId());
+                            markerUsuario = usuariosLogadosMarker.get(usuario.getId());
 
                             PhotoMarker marker = new PhotoMarker();
-                            marker.setMarker(makerUsuario);
+                            marker.setUsuario(usuario);
+                            marker.setMarker(markerUsuario);
                             marker.setUri(Uri.parse(usuario.getPhoto()));
 
+                            markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
                             new SetarFotoMarkerTask().execute(marker);
 
-                            new MarkerAnimation().animateMarkerToGB(makerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
+                            new MarkerAnimation().animateMarkerToGB(markerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
                         }
                     } else {
                         usuariosLogados.remove(usuario.getId());
@@ -264,22 +270,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 } else {
                     if(usuario.getOnline()) {
-                        Marker makerUsuario;
+                        Marker markerUsuario;
                         LatLng localizacaoUsuario = new LatLng(usuario.getLatitude(), usuario.getLongitude());
 
                         MarkerOptions markerOptions = new MarkerOptions().position(localizacaoUsuario);
-                        makerUsuario = mMap.addMarker(markerOptions);
-                        makerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
+                        markerUsuario = mMap.addMarker(markerOptions);
+                        markerUsuario.setTitle(usuario != null ? usuario.getNome() : "");
                         mMap.setIndoorEnabled(true);
 
                         PhotoMarker marker = new PhotoMarker();
-                        marker.setMarker(makerUsuario);
+                        marker.setMarker(markerUsuario);
                         marker.setUri(Uri.parse(usuario.getPhoto()));
 
+                        markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
                         new SetarFotoMarkerTask().execute(marker);
 
                         usuariosLogados.put(usuario.getId(), usuario);
-                        usuariosLogadosMarker.put(usuario.getId(), makerUsuario);
+                        usuariosLogadosMarker.put(usuario.getId(), markerUsuario);
 
                         mostrarUsuariosLogados();
                     }
@@ -329,6 +336,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         usuarioMarker.setTitle(usuario.getNome());
 
                         PhotoMarker marker = new PhotoMarker();
+                        marker.setUsuario(usuario);
                         marker.setMarker(usuarioMarker);
                         marker.setUri(Uri.parse(usuario.getPhoto()));
 
@@ -537,12 +545,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private class SetarFotoMarkerTask extends AsyncTask<PhotoMarker, Void, Void> {
         @Override
         protected Void doInBackground(final PhotoMarker... photoMarkers) {
-            final Bitmap bpm = getBitmapFromURL(photoMarkers[0].getUri().toString());
+            final Bitmap bmp = getBitmapFromURL(photoMarkers[0].getUri().toString());
+
+            if(photoMarkers[0].getUsuario() != null) {
+                photoMarkers[0].getUsuario().setImgPerfil(bmp);
+            }
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    photoMarkers[0].getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, bpm)));
+                    photoMarkers[0].getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, bmp)));
+                    menuPerfil.setEnabled(true);
                 }
             });
 

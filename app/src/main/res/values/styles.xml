@@ -17,4 +17,82 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="title" >
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
+    <style name="title.expanded">
+        <item name="android:textSize">38sp</item>
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:shadowColor">@color/colorBlack</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+    <style name="title.collapsed">
+        <item name="android:textSize">20sp</item>
+    </style>
+    <style name="subtitle">
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
+    <style name="subtitle.expanded">
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:shadowColor">@color/colorBlack</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+    <style name="subtitle.collapsed">
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
+
+
+    <style name="TitleTextShadow">
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:shadowColor">@color/colorBlack</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <style name="TitleTextShadowLarge">
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:shadowColor">@color/colorBlack</item>
+        <item name="android:textSize">38sp</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <style name="TitleTextShadowSmall">
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:shadowColor">@color/colorBlack</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+    <style name="SubTitleTextShadowSmall">
+        <item name="android:paddingLeft">4px</item>
+        <item name="android:paddingBottom">4px</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:shadowColor">@color/colorBlack</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+    </style>
+
+
+
 </resources>

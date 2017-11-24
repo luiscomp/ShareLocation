@@ -1,5 +1,6 @@
 package com.example.admed.sharelocation.objetos;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -16,8 +17,30 @@ public class Usuario implements Parcelable {
     private Double longitude;
     private Boolean online;
     private String photo;
+    private Bitmap imgPerfil;
 
     public Usuario() {
+    }
+
+    protected Usuario(Parcel in) {
+        id = in.readString();
+        nome = in.readString();
+        email = in.readString();
+        senha = in.readString();
+        if (in.readByte() == 0) {
+            latitude = null;
+        } else {
+            latitude = in.readDouble();
+        }
+        if (in.readByte() == 0) {
+            longitude = null;
+        } else {
+            longitude = in.readDouble();
+        }
+        byte tmpOnline = in.readByte();
+        online = tmpOnline == 0 ? null : tmpOnline == 1;
+        photo = in.readString();
+        imgPerfil = in.readParcelable(Bitmap.class.getClassLoader());
     }
 
     public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
@@ -32,24 +55,12 @@ public class Usuario implements Parcelable {
         }
     };
 
-    protected Usuario(Parcel in) {
-        id = in.readString();
-        nome = in.readString();
-        email = in.readString();
-        senha = in.readString();
-        photo = in.readString();
-        if (in.readByte() == 0) {
-            latitude = null;
-        } else {
-            latitude = in.readDouble();
-        }
-        if (in.readByte() == 0) {
-            longitude = null;
-        } else {
-            longitude = in.readDouble();
-        }
-        byte tmpOnline = in.readByte();
-        online = tmpOnline == 0 ? null : tmpOnline == 1;
+    public Bitmap getImgPerfil() {
+        return imgPerfil;
+    }
+
+    public void setImgPerfil(Bitmap imgPerfil) {
+        this.imgPerfil = imgPerfil;
     }
 
     public String getId() {
@@ -123,11 +134,11 @@ public class Usuario implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+
         dest.writeString(id);
         dest.writeString(nome);
         dest.writeString(email);
         dest.writeString(senha);
-        dest.writeString(photo);
         if (latitude == null) {
             dest.writeByte((byte) 0);
         } else {
@@ -141,5 +152,7 @@ public class Usuario implements Parcelable {
             dest.writeDouble(longitude);
         }
         dest.writeByte((byte) (online == null ? 0 : online ? 1 : 2));
+        dest.writeString(photo);
+        dest.writeParcelable(imgPerfil, flags);
     }
 }
