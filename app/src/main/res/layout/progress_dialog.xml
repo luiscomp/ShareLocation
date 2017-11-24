@@ -11,7 +11,7 @@
     <com.tuyenmonkey.mkloader.MKLoader
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:mk_type="FishSpinner"
+        app:mk_type="FourPulse"
         app:mk_color="@color/colorAccent"/>
 
 </RelativeLayout>

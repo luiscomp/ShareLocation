@@ -17,8 +17,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 
 import com.example.admed.sharelocation.R;
+import com.example.admed.sharelocation.dialogs.ProgressDialog;
 import com.example.admed.sharelocation.objetos.Usuario;
 import com.example.admed.sharelocation.utils.Permissoes;
 import com.example.admed.sharelocation.utils.PhotoMarker;
@@ -26,6 +28,7 @@ import com.example.admed.sharelocation.utils.Util;
 import com.example.admed.sharelocation.utils.mapsutil.LatLngInterpolator;
 import com.example.admed.sharelocation.utils.mapsutil.MapUtils;
 import com.example.admed.sharelocation.utils.mapsutil.MarkerAnimation;
+import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -71,6 +74,10 @@ import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
+    private FloatingActionButton menuPerfil;
+    private FloatingActionButton menuSair;
+
+
     private static final int RESULT_LOCALIZACAO_PERMISSION = 1;private static String[] permissoesLocalizacao = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -86,6 +93,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Map<String, Usuario> usuariosLogados = new HashMap<>();
     private Map<String, Marker> usuariosLogadosMarker = new HashMap<>();
+
+    private ProgressDialog progressDialog;
+
 
     private LocationCallback locationCallBack = new LocationCallback() {
         @Override
@@ -120,9 +130,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        instanciarComponentes();
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         setUpGClient();
+    }
+
+    private void instanciarComponentes() {
+        menuPerfil = findViewById(R.id.menuPerfil);
+        menuPerfil.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, PerfilActivity.class);
+                intent.putExtra("usuario", usuario);
+                startActivity(intent);
+            }
+        });
+
+
+        menuSair = findViewById(R.id.menuSair);
+        menuSair.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(MapsActivity.this)
+                        .setTitle(getString(R.string.sair_text))
+                        .setMessage(getString(R.string.fazer_logout_text))
+                        .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                progressDialog = new ProgressDialog();
+                                progressDialog.show(getSupportFragmentManager(), "progressDialog");
+
+                                singOut = true;
+                                dialog.dismiss();
+                                atualizarUsuarioParaOffline();
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.nao_text), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .create()
+                        .show();
+            }
+        });
     }
 
     @Override
@@ -312,31 +366,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onBackPressed() {
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.sair_text))
-                .setMessage(getString(R.string.fazer_logout_text))
-                .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        singOut = true;
-                        dialog.dismiss();
-                        finish();
-                    }
-                })
-                .setNegativeButton(getString(R.string.nao_text), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        singOut = false;
-                        dialog.dismiss();
-                        finish();
-                    }
-                })
-                .create()
-                .show();
-    }
-
-    @Override
     protected void onDestroy() {
         atualizarUsuarioParaOffline();
         mFusedLocationProviderClient.removeLocationUpdates(locationCallBack);
@@ -357,6 +386,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if(task.isSuccessful()) {
                             if(singOut) {
                                 FirebaseAuth.getInstance().signOut();
+
+                                progressDialog.dismiss();
+
+                                Intent intent = new Intent(MapsActivity.this, LoginActivity.class);
+                                startActivity(intent);
+                                finish();
                             }
                         }
                     }
