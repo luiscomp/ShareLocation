@@ -89,6 +89,7 @@ public class PerfilActivity extends AppCompatActivity implements OnMapReadyCallb
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Usuario usuario = dataSnapshot.getValue(Usuario.class);
+                usuario.setImgPerfil(PerfilActivity.this.usuario.getImgPerfil());
                 marcarLocalizacaoNoMapa(usuario);
 
                 ((CollapsingToolbarLayout) findViewById(R.id.toolbar_layout)).setSubtitle(usuario.getOnline() ? getString(R.string.online_text) : getString(R.string.offline_text));
