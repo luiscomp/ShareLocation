@@ -570,12 +570,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    for(String chave: usuariosLogadosMarker.keySet()) {
-                        if(photoMarkers[0].getMarker().equals(usuariosLogadosMarker.get(chave)) || photoMarkers[0].getMarker().equals(usuarioMarker)) {
-                            photoMarkers[0].getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, bmp)));
-                            menuPerfil.setEnabled(true);
-                            break;
-                        }
+                    try {
+                        photoMarkers[0].getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, bmp)));
+                        menuPerfil.setEnabled(true);
+                    } catch (IllegalArgumentException e) {
+                        // Ignorar erro, pois ele só ocorre quando algum marcador saiu do mapa e havia uma task para atualizar sua imagem. Ao tentar setar a nova imagem ele já não existe.
                     }
                 }
             });
