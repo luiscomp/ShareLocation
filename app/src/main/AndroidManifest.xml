@@ -48,7 +48,12 @@
 
         <activity
             android:name=".activities.CropImageActivity"
-            android:label="@string/title_activity_cortar_foto" />
+            android:label="@string/title_activity_cortar_foto"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.RegistrarActivity"/>
+        </activity>
         <activity
             android:name=".activities.PerfilActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>

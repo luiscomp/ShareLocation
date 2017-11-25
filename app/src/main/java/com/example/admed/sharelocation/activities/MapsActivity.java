@@ -22,6 +22,8 @@ import android.view.View;
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.dialogs.ProgressDialog;
 import com.example.admed.sharelocation.objetos.Usuario;
+import com.example.admed.sharelocation.utils.Constantes;
+import com.example.admed.sharelocation.utils.ImageUtils;
 import com.example.admed.sharelocation.utils.Permissoes;
 import com.example.admed.sharelocation.utils.PhotoMarker;
 import com.example.admed.sharelocation.utils.Util;
@@ -240,12 +242,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             marker.setMarker(markerUsuario);
                             marker.setUri(Uri.parse(usuario.getPhoto()));
 
+                            usuario.setImgPerfil(new ImageUtils(this).setFileName(usuario.getId()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).load());
                             if(usuariosLogados.get(usuario.getId()).getImgPerfil() == null) {
                                 markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
+                                new SetarFotoMarkerTask().execute(marker);
                             } else {
                                 markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, usuariosLogados.get(usuario.getId()).getImgPerfil())));
                             }
-                            new SetarFotoMarkerTask().execute(marker);
 
                             usuariosLogadosMarker.put(usuario.getId(), markerUsuario);
 
@@ -261,12 +264,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             marker.setMarker(markerUsuario);
                             marker.setUri(Uri.parse(usuario.getPhoto()));
 
+                            usuario.setImgPerfil(new ImageUtils(this).setFileName(usuario.getId()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).load());
                             if(usuariosLogados.get(usuario.getId()).getImgPerfil() == null) {
                                 markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
+                                new SetarFotoMarkerTask().execute(marker);
                             } else {
                                 markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, usuariosLogados.get(usuario.getId()).getImgPerfil())));
                             }
-                            new SetarFotoMarkerTask().execute(marker);
 
                             new MarkerAnimation().animateMarkerToGB(markerUsuario, localizacaoUsuario, new LatLngInterpolator.Linear());
                         }
@@ -288,7 +292,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         marker.setMarker(markerUsuario);
                         marker.setUri(Uri.parse(usuario.getPhoto()));
 
-                        markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
+                        usuario.setImgPerfil(new ImageUtils(this).setFileName(usuario.getId()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).load());
+                        markerUsuario.setIcon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, usuario.getImgPerfil())));
                         new SetarFotoMarkerTask().execute(marker);
 
                         usuariosLogados.put(usuario.getId(), usuario);
@@ -456,9 +461,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         localizacaoAtual = new LatLng(location.getLatitude(), location.getLongitude());
 
         if(usuarioMarker == null) {
+            Bitmap imgPerfil = new ImageUtils(this).setFileName(fbUser.getUid()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).load();
+
             MarkerOptions markerOptions;
-            markerOptions = new MarkerOptions().position(localizacaoAtual)
-                    .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, null)));
+            markerOptions = new MarkerOptions()
+                    .position(localizacaoAtual)
+                    .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, imgPerfil)));
 
             usuarioMarker = mMap.addMarker(markerOptions);
             mMap.setIndoorEnabled(true);
@@ -565,6 +573,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             if(photoMarkers[0].getUsuario() != null) {
                 photoMarkers[0].getUsuario().setImgPerfil(bmp);
+                salvarImagemNaMemoriaInterna(photoMarkers[0].getUsuario(), bmp);
             }
 
             runOnUiThread(new Runnable() {
@@ -579,6 +588,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
             return null;
+        }
+
+        private void salvarImagemNaMemoriaInterna(Usuario usuario, Bitmap bitmap) {
+            new ImageUtils(MapsActivity.this).setFileName(usuario.getId()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).save(bitmap);
         }
 
         private Bitmap getBitmapFromURL(String src) {

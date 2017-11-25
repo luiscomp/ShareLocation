@@ -1,6 +1,5 @@
 package com.example.admed.sharelocation.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,6 +10,8 @@ import android.view.View;
 
 import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.objetos.Usuario;
+import com.example.admed.sharelocation.utils.Constantes;
+import com.example.admed.sharelocation.utils.ImageUtils;
 import com.example.admed.sharelocation.utils.Util;
 import com.example.admed.sharelocation.utils.mapsutil.LatLngInterpolator;
 import com.example.admed.sharelocation.utils.mapsutil.MarkerAnimation;
@@ -126,6 +127,8 @@ public class PerfilActivity extends AppCompatActivity implements OnMapReadyCallb
         localizacaoAtual = new LatLng(usuario.getLatitude(), usuario.getLongitude());
 
         if(usuarioMarker == null) {
+            usuario.setImgPerfil(new ImageUtils(this).setFileName(usuario.getId()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).load());
+
             MarkerOptions markerOptions;
             markerOptions = new MarkerOptions().position(localizacaoAtual).icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(PerfilActivity.this, R.drawable.ic_launcher_background, usuario.getImgPerfil())));
 

@@ -23,7 +23,9 @@ import com.example.admed.sharelocation.R;
 import com.example.admed.sharelocation.dialogs.ProgressDialog;
 import com.example.admed.sharelocation.objetos.Usuario;
 import com.example.admed.sharelocation.singletons.FotoSingleton;
+import com.example.admed.sharelocation.utils.Constantes;
 import com.example.admed.sharelocation.utils.Criptografia;
+import com.example.admed.sharelocation.utils.ImageUtils;
 import com.example.admed.sharelocation.utils.Permissoes;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -188,6 +190,8 @@ public class RegistrarActivity extends AppCompatActivity {
 
                             usuariosReference.child(usuario.getId()).setValue(usuario);
 
+                            salvarImagemNaMemoriaInterna(croppedBitmap);
+
                             chamarTelaMapa();
                         } else {
                             Toast.makeText(RegistrarActivity.this, getString(R.string.nao_e_possivel_registrar_usuario), Toast.LENGTH_SHORT).show();
@@ -279,7 +283,7 @@ public class RegistrarActivity extends AppCompatActivity {
     }
 
     private void uploadFirebase (Bitmap bitmap){
-        bitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
+        croppedBitmap = Bitmap.createScaledBitmap(bitmap, 200, 200, false);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -299,5 +303,9 @@ public class RegistrarActivity extends AppCompatActivity {
                 concluirRegistroNovoUsuario();
             }
         });
+    }
+
+    private void salvarImagemNaMemoriaInterna(Bitmap bitmap) {
+        new ImageUtils(this).setFileName(usuario.getId()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).save(bitmap);
     }
 }
