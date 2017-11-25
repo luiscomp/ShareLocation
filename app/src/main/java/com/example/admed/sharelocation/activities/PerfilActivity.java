@@ -47,11 +47,11 @@ public class PerfilActivity extends AppCompatActivity implements OnMapReadyCallb
 
         usuario = getIntent().getParcelableExtra("usuario");
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
         ((CollapsingToolbarLayout) findViewById(R.id.toolbar_layout)).setTitle(usuario.getNome());
         ((CollapsingToolbarLayout) findViewById(R.id.toolbar_layout)).setSubtitle(usuario.getOnline() ? getString(R.string.online_text) : getString(R.string.offline_text));
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
