@@ -235,7 +235,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             MarkerOptions markerOptions = new MarkerOptions().position(localizacaoUsuario);
                             markerUsuario = mMap.addMarker(markerOptions);
-                            mMap.setIndoorEnabled(true);
+                            mMap.setIndoorEnabled(false);
 
                             PhotoMarker marker = new PhotoMarker();
                             marker.setUsuario(usuario);
@@ -285,7 +285,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         MarkerOptions markerOptions = new MarkerOptions().position(localizacaoUsuario);
                         markerUsuario = mMap.addMarker(markerOptions);
-                        mMap.setIndoorEnabled(true);
+                        mMap.setIndoorEnabled(false);
 
                         PhotoMarker marker = new PhotoMarker();
                         marker.setUsuario(usuario);
@@ -469,7 +469,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, imgPerfil)));
 
             usuarioMarker = mMap.addMarker(markerOptions);
-            mMap.setIndoorEnabled(true);
+            mMap.setIndoorEnabled(false);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 14.0f));
         } else {
             if(usuario != null && usuario.getImgPerfil() == null) {
