@@ -32,4 +32,6 @@
     <string name="falha_na_comunicacao_com_o_servidor_text">Falha na comunicação com o servidor, tente novamente</string>
     <string name="offline_text">offline</string>
     <string name="online_text">online</string>
+    <string name="perfil_text">Perfil</string>
+    <string name="logout_text">Logout</string>
 </resources>

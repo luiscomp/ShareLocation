@@ -158,7 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 new AlertDialog.Builder(MapsActivity.this)
-                        .setTitle(getString(R.string.sair_text))
+                        .setTitle(getString(R.string.logout_text))
                         .setMessage(getString(R.string.fazer_logout_text))
                         .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
                             @Override

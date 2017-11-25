@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_person_white_24dp"
             fab:fab_size="mini"
-            fab:fab_label="Perfil"
+            fab:fab_label="@string/perfil_text"
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorPressed="@color/colorPrimary"
             app:fab_colorRipple="@color/colorPrimaryDark"/>
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_keyboard_arrow_right_white_24dp"
             fab:fab_size="mini"
-            fab:fab_label="Sair"
+            fab:fab_label="@string/logout_text"
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorPressed="@color/colorPrimary"
             app:fab_colorRipple="@color/colorPrimaryDark"/>
