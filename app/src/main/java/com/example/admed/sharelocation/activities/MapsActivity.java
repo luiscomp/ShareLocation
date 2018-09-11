@@ -97,7 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Map<String, Usuario> usuariosLogados = new HashMap<>();
     private Map<String, Marker> usuariosLogadosMarker = new HashMap<>();
 
-    private ProgressDialog progressDialog;
+    private ProgressDialog progressDialog = new ProgressDialog();
 
 
     private LocationCallback locationCallBack = new LocationCallback() {
@@ -163,7 +163,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .setPositiveButton(getString(R.string.sim_text), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                progressDialog = new ProgressDialog();
                                 progressDialog.show(getSupportFragmentManager(), "progressDialog");
 
                                 singOut = true;
@@ -457,33 +456,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void marcarPosicaoNoMapa(Location location) {
-        final LatLng localizacaoAtual;
-        localizacaoAtual = new LatLng(location.getLatitude(), location.getLongitude());
+        if(location != null) {
+            progressDialog.dismiss();
+            final LatLng localizacaoAtual;
+            localizacaoAtual = new LatLng(location.getLatitude(), location.getLongitude());
 
-        if(usuarioMarker == null) {
-            Bitmap imgPerfil = new ImageUtils(this).setFileName(fbUser.getUid()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).load();
+            if (usuarioMarker == null) {
+                Bitmap imgPerfil = new ImageUtils(this).setFileName(fbUser.getUid()).setDirectoryName(Constantes.DIRECTORY_PHOTOS).load();
 
-            MarkerOptions markerOptions;
-            markerOptions = new MarkerOptions()
-                    .position(localizacaoAtual)
-                    .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, imgPerfil)));
+                MarkerOptions markerOptions;
+                markerOptions = new MarkerOptions()
+                        .position(localizacaoAtual)
+                        .icon(BitmapDescriptorFactory.fromBitmap(Util.getMarkerBitmapFromView(MapsActivity.this, R.drawable.ic_launcher_background, imgPerfil)));
 
-            usuarioMarker = mMap.addMarker(markerOptions);
-            mMap.setIndoorEnabled(false);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 14.0f));
-        } else {
-            if(usuario != null && usuario.getImgPerfil() == null) {
-                PhotoMarker marker = new PhotoMarker();
-                marker.setMarker(usuarioMarker);
-                marker.setUri(Uri.parse(usuario.getPhoto()));
+                usuarioMarker = mMap.addMarker(markerOptions);
+                mMap.setIndoorEnabled(false);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 14.0f));
+            } else {
+                if (usuario != null && usuario.getImgPerfil() == null) {
+                    PhotoMarker marker = new PhotoMarker();
+                    marker.setMarker(usuarioMarker);
+                    marker.setUri(Uri.parse(usuario.getPhoto()));
 
-                new SetarFotoMarkerTask().execute(marker);
+                    new SetarFotoMarkerTask().execute(marker);
+                }
+
+                new MarkerAnimation().animateMarkerToGB(usuarioMarker, localizacaoAtual, new LatLngInterpolator.Linear());
             }
 
-            new MarkerAnimation().animateMarkerToGB(usuarioMarker, localizacaoAtual, new LatLngInterpolator.Linear());
+            atualizarPosicaoFireBase(localizacaoAtual);
+        } else {
+            progressDialog.show(getSupportFragmentManager(), "dialogLoader");
         }
-
-        atualizarPosicaoFireBase(localizacaoAtual);
     }
 
     private void atualizarPosicaoFireBase(final LatLng localizacaoAtual) {
